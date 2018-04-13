@@ -1,0 +1,76 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Cadastro usuário</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-item>
+    <ion-label>Nome</ion-label>
+    <ion-input type="text" [(ngModel)]="usuario.nome" name="nome"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Idade</ion-label>
+    <ion-input type="number" [(ngModel)]="usuario.idade" name="idade"></ion-input>
+  </ion-item>
+  <ion-item>
+  <button ion-button icon-only color="secondary" (click)="uploadImagem()" >
+      <ion-icon name="cloud-upload">
+      </ion-icon>
+    </button>
+  </ion-item>
+
+
+  <ion-item *ngIf="usuario.foto != ''">
+      <img width="80" height="80" [src]="usuario.foto">
+  </ion-item>
+
+
+  <button ion-button round (click)="salvarUsuario()" >Salvar</button>
+
+
+  <ion-grid>
+    <ion-row>
+    <ion-col>
+      Nome
+    </ion-col>
+    <ion-col>
+      Idade
+    </ion-col>
+    <ion-col>
+        .
+    </ion-col>
+
+  </ion-row>
+
+  <ion-row *ngFor="let user of usuarios">
+
+    <ion-col>
+      {{ user.nome }}
+    </ion-col>
+
+    <ion-col>
+      {{ user.idade }}
+    </ion-col>
+
+    <ion-col>
+        
+      
+      <button ion-button round (click)="editar(user)" >
+          <ion-icon name="md-create"></ion-icon>
+      </button>
+    
+      <button ion-button round (click)="deletar(user)" color="danger" >
+          <ion-icon name="remove-circle"></ion-icon>
+      </button>
+    </ion-col>
+
+
+  </ion-row>
+
+  </ion-grid>
+
+
+</ion-content>
