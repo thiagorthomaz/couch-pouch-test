@@ -34,6 +34,9 @@
   <ion-grid>
     <ion-row>
     <ion-col>
+      ID
+    </ion-col>
+    <ion-col>
       Nome
     </ion-col>
     <ion-col>
@@ -45,7 +48,11 @@
 
   </ion-row>
 
-  <ion-row *ngFor="let user of usuarios">
+  <ion-row *ngFor="let user of usuarios | async">
+
+    <ion-col>
+      {{ user.id }}
+    </ion-col>
 
     <ion-col>
       {{ user.nome }}

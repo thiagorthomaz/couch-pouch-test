@@ -14,9 +14,10 @@ export class ContactPage {
 
   constructor(public navCtrl: NavController, public usuarioService:UsuarioProvider) {
 
-    this.usuarioService.getUsuario().then((data) => {
+    this.usuarios = this.usuarioService.getUsuario();
+    /*this.usuarioService.getUsuario().then((data) => {
       this.usuarios= data;
-    });
+    });*/
 
 
   }

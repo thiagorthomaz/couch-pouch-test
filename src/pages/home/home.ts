@@ -5,14 +5,28 @@ import { UsuarioProvider } from '../../providers/usuario/usuario';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Dialogs } from '@ionic-native/dialogs';
 
+import { Observable } from 'rxjs/Observable';
+
+
+export interface Usuario {
+  id : string;
+  nome : string;
+  idade : string;
+  foto : string;
+}
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
 
-  public usuarios : any;
-  public usuario = {nome:"", idade:"", foto: ""};
+  
+  public usuarios : Observable<Usuario[]>;
+  
+
+  public usuario = {id : "",nome:"", idade:"", foto: ""};
+
   public options: CameraOptions = {
     quality: 100,
     destinationType: this.camera.DestinationType.DATA_URL,
@@ -20,25 +34,25 @@ export class HomePage {
     mediaType: this.camera.MediaType.PICTURE
   };
 
-  constructor(public navCtrl: NavController, public usuarioService : UsuarioProvider, public alertCtrl: AlertController, private camera:Camera, private dialogs: Dialogs) {
+  constructor(
+    public navCtrl: NavController, 
+    public usuarioService : UsuarioProvider, 
+    public alertCtrl: AlertController, 
+    private camera:Camera, 
+    private dialogs: Dialogs
+    ) {
 
+      
+    
   }
   
   
   ionViewDidLoad() {
-
-    this.usuarioService.getUsuario().then((data) => {
-      console.log(data);
-      this.usuarios= data;
-    });
-
+    this.usuarios = this.usuarioService.getUsuario();
   }
 
   public uploadImagem() {
-    
 
-
-    
     this.camera.getPicture(this.options).then((imageData) => {
      // imageData is either a base64 encoded string or a file URI
      // If it's base64:
@@ -67,7 +81,12 @@ export class HomePage {
   }
 
   public salvarUsuario() {
-    this.usuarioService.createUsuario(this.usuario);    
+    if ( !this.usuario.id ) {
+      this.usuarioService.createUsuario(this.usuario);    
+    } else {
+      this.usuarioService.updateUsuario(this.usuario);    
+    }
+    
   }
 
 }

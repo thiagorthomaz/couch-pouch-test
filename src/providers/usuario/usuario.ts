@@ -5,33 +5,46 @@ import PouchDBFind from 'pouchdb-find';
 PouchDB.plugin(PouchDBFind);
 
 
+
+import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFirestoreCollection } from 'angularfire2/firestore';
+import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireAuth } from 'angularfire2/auth';
+import { Observable } from 'rxjs/Observable';
+
+
+
+export interface Usuario {
+  id : string;
+  nome : string;
+  idade : string;
+  foto : string;
+}
+
+
 @Injectable()
 export class UsuarioProvider {
 
+  public usuarios : Observable<Usuario[]>;
+  usuariosCollectionRef: AngularFirestoreCollection<Usuario>;
 
   public data:any;
   public db:any;
   public remote:any;
+
+  constructor(public afAuth: AngularFireAuth, 
+    private afs: AngularFirestore) {
+
+      this.afAuth.auth.signInAnonymously();
+      this.usuariosCollectionRef = this.afs.collection('usuarios'); 
   
-
-  constructor() {
-    
-    this.db = new PouchDB("usuario");
-    this.remote = "http://couchdb.thiagothomaz.com.br:5984/usuario";
-    
-    /**
-     * Tenta se conectar com a base remota
-     * se não conseguir tenta novamente
-     * e continua tentando.
-     */
-    let options = {
-      live : true,
-      retry : true,
-      continuous : true
-    }
-
-    this.db.sync(this.remote, options);
-
+      this.usuarios = this.usuariosCollectionRef.snapshotChanges().map(actions => {
+        return actions.map(action => {
+          const data = action.payload.doc.data() as Usuario;
+          const id = action.payload.doc.id;
+          return { id, ...data };
+        });
+      });
 
   }
 
@@ -43,80 +56,24 @@ export class UsuarioProvider {
 
   }
 
-  public updateUsuario(usuario:any) {
-
-      this.db.put(usuario).catch( (err) => {
-        console.log(err);
-      } );
-
+  public updateUsuario(usuario:Usuario) {
+    this.usuariosCollectionRef.doc(usuario.id).update( usuario );
   }
 
 
-  public removeUsuario(usuario:any) {
-
-    this.db.remove(usuario);
+  public removeUsuario(usuario:Usuario) {
+    console.log("Deletando: " + usuario.id);
+    this.usuariosCollectionRef.doc(usuario.id).delete();
 
 }
 
-  public createUsuario(usuario:any) {
-    this.db.post(usuario);    
+  public createUsuario(usuario:Usuario) {
+    delete usuario.id;
+    this.usuariosCollectionRef.add( usuario ); 
   }
 
   public getUsuario() {
-
-    if (this.data) {
-      return Promise.resolve(this.data);
-    }
-
-    return new Promise(
-      resolve => this.db.allDocs({
-        include_docs:true
-      }).then((result)=>{
-        this.data = [];
-        let docs = result.rows.map((row)=>{
-          this.data.push(row.doc);
-        });
-        
-        resolve(this.data);
-
-        this.db.changes({live:true, since:'now', include_docs:true}).on('change', (change) => {
-          this.handleChange(change);
-        });
-
-      })
-    );
-
-  }
-
-  public handleChange(change:any) {
-
-    let changedDoc = null;
-    let changedIndex = null;
-
-    this.data.forEach( (doc, index) => {
-      if (doc._id === change.id) {
-        changedDoc = doc;
-        changedIndex = index;
-      }
-    } );
-
-
-    //Documento deletado.
-    if ( change.deleted ) {
-      this.data.splice(changedIndex, 1);
-    } else {
-      
-      if (changedDoc) {
-        //Documento atualizado.
-        this.data[changedIndex] = change.doc;
-      } else {
-        //Documento adicionado
-        this.data.push(change.doc);
-      }
-
-    } 
-
-
+    return this.usuarios;
   }
 
 }

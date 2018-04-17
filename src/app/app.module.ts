@@ -14,6 +14,15 @@ import { UsuarioProvider } from '../providers/usuario/usuario';
 import { Camera } from '@ionic-native/camera';
 import { Dialogs } from '@ionic-native/dialogs';
 
+
+import { AngularFireModule } from 'angularfire2';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
+import { AngularFireAuthModule } from 'angularfire2/auth';
+import { AngularFireDatabaseModule } from 'angularfire2/database';
+
+import { credentials } from './config';
+
+
 @NgModule({
   declarations: [
     MyApp,
@@ -24,6 +33,10 @@ import { Dialogs } from '@ionic-native/dialogs';
   ],
   imports: [
     BrowserModule,
+    AngularFireModule.initializeApp(credentials.firebase),
+    AngularFirestoreModule.enablePersistence(),
+    AngularFireAuthModule,
+    AngularFireDatabaseModule,
     IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
